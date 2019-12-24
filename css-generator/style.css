@@ -1,0 +1,7 @@
+#block {
+    width: 200px;
+    height: 100px;
+    background-color: chartreuse;
+    border-color: blueviolet;
+    border-style: solid;
+}
