@@ -1,0 +1,18 @@
+.menu-item {
+    position: relative;
+    display: inline-block;
+    vertical-align: top;
+    border: 2px solid #66cdaa;
+}
+.menu-link {
+    display: block;
+    text-decoration: none;
+}
+.submenu {
+    position: absolute;
+    left: -2px;
+    top: 100%;
+    height: 40px;
+    width: 120px;
+    background-color: aquamarine;
+}

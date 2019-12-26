@@ -1,0 +1,10 @@
+#slider {
+    overflow: hidden;
+}
+.slider-in {
+    width: auto;
+}
+.slide {
+    float: left;
+    width: 100%;
+}
