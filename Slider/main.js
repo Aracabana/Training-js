@@ -1,3 +1,13 @@
+function Slider(sliderWrapper) {
+    this.sliderWrapper = sliderWrapper;
+    this.sliderWidth = this.sliderWrapper.offsetWidth;
+    this.createSliderIn = function() {
+        let sliderIn = document.createElement('div');
+        sliderIn.classList.add('slider-in');
+        this.sliderWrapper.prepend(sliderIn);
+    };
+}
+
 window.onload = function() {
     let slider = document.getElementById('slider');
     let sliderWidth = slider.offsetWidth;
@@ -6,15 +16,15 @@ window.onload = function() {
     sliderIn.classList.add('slider-in');
     slider.prepend(sliderIn);
     
-    let slides = document.getElementsByClassName('slide');
+    let slides = Array.from(document.getElementsByClassName('slide'));
     let slidesWidth = 0;
     let slideWidth;
-    for (let i = 0; i < slides.length; i++) {
-        slideWidth = slides[i].offsetWidth;
+    slides.forEach(function(item){
+        slideWidth = item.offsetWidth;
         slidesWidth += slideWidth;
-        slides[i].style.width = sliderWidth + 'px';
-        sliderIn.appendChild(slides[i]);
-    }
+        item.style.width = sliderWidth + 'px';
+        sliderIn.append(item);
+    });
     sliderIn.style.width = slidesWidth + 'px';
     
     
@@ -35,12 +45,22 @@ window.onload = function() {
     let sliderInTranslate = 0;
     function showPrevSlide() {
         sliderInTranslate -= slideWidth;
-        console.log(sliderInTranslate);
         sliderIn.style.transform = 'translateX(-' + sliderInTranslate + 'px)';
+        //if (sliderInTranslate > 0) {
+        //    buttonNext.removeAttribute('disabled');
+        //    sliderIn.style.transform = 'translateX(-' + sliderInTranslate + 'px)';
+        //} else {
+        //    buttonPrev.setAttribute('disabled', true);
+        //}
     }
     function showNextSlide() {
         sliderInTranslate += slideWidth;
-        console.log(sliderInTranslate);
-        sliderIn.style.transform = 'translateX(' + sliderInTranslate + 'px)';
+        sliderIn.style.transform = 'translateX(-' + sliderInTranslate + 'px)';
+        //if (sliderInTranslate < slidesWidth) {
+        //    buttonPrev.removeAttribute('disabled');
+        //    sliderIn.style.transform = 'translateX(-' + sliderInTranslate + 'px)';
+        //} else {
+        //    buttonNext.setAttribute('disabled', true);
+        //}
     }
 };

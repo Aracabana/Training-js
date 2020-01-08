@@ -2,9 +2,14 @@
     overflow: hidden;
 }
 .slider-in {
+    overflow: hidden;
+    margin-bottom: 20px;
     width: auto;
+    transition: all linear 0.5s;
 }
 .slide {
     float: left;
+    box-sizing: border-box;
     width: 100%;
+    padding: 20px;
 }
