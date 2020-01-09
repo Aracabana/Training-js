@@ -1,14 +1,36 @@
 function Slider(sliderWrapper) {
     this.sliderWrapper = sliderWrapper;
     this.sliderWidth = this.sliderWrapper.offsetWidth;
+    this.slides = Array.from(this.sliderWrapper.children);
+    this.sliderIn = '';
     this.createSliderIn = function() {
-        let sliderIn = document.createElement('div');
-        sliderIn.classList.add('slider-in');
-        this.sliderWrapper.prepend(sliderIn);
+        this.sliderIn = document.createElement('div');
+        this.sliderIn.classList.add('slider-in');
+        this.sliderWrapper.prepend(this.sliderIn);
+        return this.sliderIn;
     };
+    this.slidesWidth = 0;
+    this.slideWidth = 0;
+    this.moveSlides = function() {
+        this.slides.forEach(function(item) {
+            this.slideWidth = item.offsetWidth;
+            this.slidesWidth += this.slideWidth;
+            item.style.width = this.sliderWidth + 'px';
+            this.sliderIn.append(item);
+        });
+        this.sliderIn.style.width = this.slidesWidth + 'px';
+    }
 }
 
-window.onload = function() {
+
+
+
+let sliderWrapper = document.getElementById('slider');
+let slider = new Slider(sliderWrapper);
+slider.createSliderIn();
+slider.moveSlides();
+
+/*window.onload = function() {
     let slider = document.getElementById('slider');
     let sliderWidth = slider.offsetWidth;
     
@@ -63,4 +85,4 @@ window.onload = function() {
         //    buttonNext.setAttribute('disabled', true);
         //}
     }
-};
+};*/
