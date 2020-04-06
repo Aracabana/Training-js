@@ -5,9 +5,17 @@ function createNewElement(element, elementParent, elementClass) {
     return newElement;
 }
 function createListTitle() {
-    let listTitle = createNewElement('h1', listWrapper, 'todo-list-title');
-    listTitle.innerText = 'Список дел';
-    return listTitle;
+    let listTitleInner = createNewElement('h1', listWrapper, 'todo-list-title-inner');
+    listTitleInner.contentEditable = true;
+    if (localStorage.getItem('listTitle') === null) {
+        let listTitleOuter = createNewElement('div', listWrapper, 'todo-list-title-outer');
+        listTitleOuter.innerText = 'Введите название списка';
+        listTitleInner.oninput = toggleListTitleOuter;
+    }
+    if (localStorage.getItem('listTitle') !== '') {
+        listTitleInner.innerText = localStorage.getItem('listTitle');
+    }
+    listTitleInner.onblur = saveListTitle;
 }
 function createListItem() {
     let listItem = document.createElement('li');
@@ -59,9 +67,22 @@ function filterListItem(filterBy, e) {
 const byAll = (item) => {item.style.display = 'list-item';};
 const byDone = (item) => {item.style.display = !item.classList.contains('done') ? 'none' : 'list-item';};
 const byActive = (item) => {item.style.display = item.classList.contains('done') ? 'none' : 'list-item';};
+function toggleListTitleOuter() {
+    let titleText = this.innerText;
+    let listTitleOuter = this.closest('.todo-list-wrapper').querySelector('.todo-list-title-outer');
+    listTitleOuter.style.display = titleText ? 'none' : 'block';
+}
+function saveListTitle() {
+    let listTitleText = this.innerText;
+    if (listTitleText !== '') {
+        localStorage.setItem('listTitle', listTitleText);
+    } else {
+        localStorage.removeItem('listTitle')
+    }
+}
 
 let listWrapper = createNewElement('div', document.body, 'todo-list-wrapper');
-let listTitle = createListTitle();
+createListTitle();
 let list = createNewElement('ul', listWrapper, 'todo-list');
 let listItemInput = createNewElement('li', list, 'todo-list-item-input');
 let listInput = createListInput();
