@@ -11,8 +11,19 @@ function Slider(sliderWrapper) {
     };
     this.slidesWidth = 0;
     this.slideWidth = 0;
+    // this.moveSlides = function() {
+    //     const $this = this;
+    //     this.slides.forEach(function(item) {
+    //         $this.slideWidth = item.offsetWidth;
+    //         $this.slidesWidth += $this.slideWidth;
+    //         item.style.width = $this.sliderWidth + 'px';
+    //         $this.sliderIn.append(item);
+    //     });
+    //     this.sliderIn.style.width = this.slidesWidth + 'px';
+    // }
+    
     this.moveSlides = function() {
-        this.slides.forEach(function(item) {
+        this.slides.forEach((item) => {
             this.slideWidth = item.offsetWidth;
             this.slidesWidth += this.slideWidth;
             item.style.width = this.sliderWidth + 'px';
@@ -21,9 +32,6 @@ function Slider(sliderWrapper) {
         this.sliderIn.style.width = this.slidesWidth + 'px';
     }
 }
-
-
-
 
 let sliderWrapper = document.getElementById('slider');
 let slider = new Slider(sliderWrapper);
