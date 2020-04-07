@@ -87,7 +87,7 @@ let list = createNewElement('ul', listWrapper, 'todo-list');
 let listItemInput = createNewElement('li', list, 'todo-list-item-input');
 let listInput = createListInput();
 listInput.addEventListener('blur', getInputValue);
-let listFilter = createNewElement('div', listWrapper, 'todo-filter');
+let listFilter = createNewElement('div', listWrapper, 'todo-filter-wrapper');
 let filterBtnAll = createListFilterBtn('Все', ['todo-filter-btn-all', 'active'], filterListItem.bind(null, byAll));
 let filterBtnDone = createListFilterBtn('Выполненные', ['todo-filter-btn-done'], filterListItem.bind(null, byDone));
 let filterBtnActive = createListFilterBtn('Активные', ['todo-filter-btn-active'], filterListItem.bind(null, byActive));
