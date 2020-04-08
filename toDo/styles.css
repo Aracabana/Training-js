@@ -41,7 +41,7 @@ body {
     padding: 0 15px;
     width: 33.3%;
 }
-.todo-list-instance {
+.todo-list-card {
     position: relative;
     border-radius: 10px;
     max-width: 600px;
@@ -55,7 +55,7 @@ body {
     z-index: 1;
     padding: 30px 30px 20px;
     font-weight: bold;
-    font-size: 22px;
+    font-size: 18px;
     color: #101010;
 }
 .todo-list-title-inner {
@@ -65,7 +65,7 @@ body {
     border-bottom: 1px solid #d4d4d4;
     padding: 30px 30px 20px;
     font-weight: bold;
-    font-size: 22px;
+    font-size: 18px;
     color: #101010;
 }
 .todo-list {
