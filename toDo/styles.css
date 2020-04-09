@@ -35,6 +35,27 @@ body {
 .add-todo-btn:hover, .add-todo-btn:active {
     background-color: darkgrey;
 }
+.remove-todo-btn {
+    position: fixed;
+    right: 5px;
+    top: 50px;
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-weight: bold;
+    font-size: 20px;
+    color: #101010;
+    background-color: lightgrey;
+    cursor: pointer;
+}
+.remove-todo-btn:hover, .remove-todo-btn:active {
+    background-color: darkgrey;
+}
 .todo-list-wrapper {
     box-sizing: border-box;
     margin-bottom: 40px;

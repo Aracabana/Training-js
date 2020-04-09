@@ -172,7 +172,11 @@ const ToDoLocalStorage = {
             const data = JSON.parse(localStorage.getItem(key));
             allToDo.push({key, data});
         }
-        allToDo.sort(function (a, b) {
+        return allToDo;
+    },
+    sortToDo: function () {
+        const allToDoSort = ToDoLocalStorage.getAll();
+        allToDoSort.sort(function (a, b) {
             if (a.data.date > b.data.date) {
                 return 1;
             }
@@ -181,7 +185,7 @@ const ToDoLocalStorage = {
             }
             return 0;
         });
-        return allToDo;
+        return allToDoSort;
     },
     getByKey: function (key) {
         return JSON.parse(localStorage.getItem(key));
@@ -203,7 +207,11 @@ let createToDoBtn = document.getElementById('js-add-todo-btn');
 createToDoBtn.onclick = function () {
     new ToDo().createNew();
 };
-const allToDo = ToDoLocalStorage.getAll();
+let removeAllToDoBtn = document.getElementById('js-remove-all-todo-btn');
+removeAllToDoBtn.onclick = function () {
+
+};
+const allToDo = ToDoLocalStorage.sortToDo();
 if (allToDo) {
     allToDo.forEach(toDo => {
         new ToDo().createExist(toDo.key, toDo.data);
