@@ -8,29 +8,34 @@ function ToDo() {
         if (a.text < b.text) {return -1;}
         return 0;
     };
+    let filterWrapper;
+    let sortWrapper;
     const btns = [
         {
             text: 'Все',
             classes: ['todo-filter-btn-all', 'active'],
+            wrapper: () => filterWrapper,
             action: filter.bind(null, byAll)
         },
         {
             text: 'Выполненные',
             classes: ['todo-filter-btn-done'],
+            wrapper: () => filterWrapper,
             action: filter.bind(null, byDone)
         },
         {
             text: 'Активные',
             classes: ['todo-filter-btn-active'],
+            wrapper: () => filterWrapper,
             action: filter.bind(null, byActive)
         },
         {
             text: 'По алфавиту',
             classes: ['todo-filter-btn-abc'],
+            wrapper: () => sortWrapper,
             action: sort.bind(null, byAbc)
         }
     ];
-    let filterWrapper;
     let titleInner;
     let titleOuter;
     let list;
@@ -48,13 +53,14 @@ function ToDo() {
         localStorage.setItem(localStorageKey, ToDoForSaveJson);
     };
     const createHTML = function () {
-        let container = document.getElementById('js-container');
         let wrapper = createNewElement('div', container, 'todo-list-wrapper');
         let card = createNewElement('div', wrapper, 'todo-list-card');
         createCardTitleHTML(card);
         list = createNewElement('ul', card, 'todo-list');
         createInputHTML(card);
-        createBtns(card);
+        let cardFooter = createNewElement('div', card, 'todo-footer');
+        createBtns(cardFooter);
+        createDeleteBtn(cardFooter, wrapper);
     };
     const createCardTitleHTML = function (card) {
         titleOuter = createNewElement('div', card, 'todo-list-title-outer');
@@ -94,21 +100,43 @@ function ToDo() {
             renderList(filter.bind(null, byAll));
             saveToLocalStorage();
         });
+        input.addEventListener('keydown', (e) => {
+            if (e.code === "Enter") {
+                const inputValue = input.value;
+                if (!inputValue) {
+                    return
+                }
+                items.push({
+                    text: inputValue,
+                    isDone: false
+                });
+                input.value = '';
+                renderList(filter.bind(null, byAll));
+                saveToLocalStorage();
+            }
+        });
     };
-    const createBtns = function(card) {
-        filterWrapper = createNewElement('div', card, 'todo-filter-wrapper');
+    const createBtns = function(cardFooter) {
+        filterWrapper = createNewElement('div', cardFooter, 'todo-filter-wrapper');
+        sortWrapper = createNewElement('div', cardFooter, 'todo-sort-wrapper');
         btns.forEach(btn => {
             createFilterBtn(btn);
         });
     };
     const createFilterBtn = function (btn) {
-        let newBtn = createNewElement('button', filterWrapper, 'todo-filter-btn');
+        let newBtn = createNewElement('button', btn.wrapper(), 'todo-filter-btn');
         newBtn.innerText = btn.text;
         newBtn.classList.add(...btn.classes);
         newBtn.addEventListener('click', (e) => {
             toggleBtnClassActive(e.target);
             renderList(btn.action);
         });
+    };
+    const createDeleteBtn = function (cardFooter, wrapper) {
+        let deleteBtn = createNewElement('button', cardFooter, 'todo-filter-btn');
+        deleteBtn.innerText = 'X';
+        deleteBtn.title = 'Удалить лист';
+        deleteBtn.addEventListener('click', removeList.bind(null, wrapper));
     };
     const toggleBtnClassActive = function (target) {
         let currentActiveBtn = filterWrapper.querySelector('.todo-filter-btn.active');
@@ -125,16 +153,20 @@ function ToDo() {
         const dataForRender = action(items);
         dataForRender.forEach(item => {
             let listItem = createNewElement('li', list, 'todo-list-item');
-            listItem.innerText = item.text;
-            listItem.onclick = changeListItemStatus.bind(this, action, item);
-            if (item.isDone) {listItem.classList.add('done');}
+            let listItemIn = createNewElement('span', listItem, 'todo-list-item-in');
+            listItemIn.innerText = item.text;
+            listItemIn.onclick = changeListItemStatus.bind(this, action, item);
+            if (item.isDone) {listItemIn.classList.add('done');}
         });
+    };
+    const removeList = function(wrapper) {
+        ToDoLocalStorage.removeOne(localStorageKey);
+        wrapper.remove();
     };
     this.createNew = function () {
         createHTML();
         items = [];
         localStorageKey = ToDoLocalStorage.getNewKey();
-        console.log(this);
     };
     this.createExist = function (key, currentToDo) {
         createHTML();
@@ -147,7 +179,7 @@ function ToDo() {
 const ToDoLocalStorage = {
     generateKey: function (keys) {
         let alphabet = 'abcdefghijklmnopqastuvwxyz';
-        let newKey = '';
+        let newKey = 'todo-';
         for (let j = 0; j < 5; j++) {
             const rand = Math.round(Math.random() * (alphabet.length - 1));
             newKey += alphabet[rand];
@@ -169,13 +201,15 @@ const ToDoLocalStorage = {
         const allToDo = [];
         for (let i = 0; i < localStorage.length; i++) {
             let key = localStorage.key(i);
-            const data = JSON.parse(localStorage.getItem(key));
-            allToDo.push({key, data});
+            if (key.includes('todo-')) {
+                const data = JSON.parse(localStorage.getItem(key));
+                allToDo.push({key, data});
+            }
         }
         return allToDo;
     },
-    sortToDo: function () {
-        const allToDoSort = ToDoLocalStorage.getAll();
+    sortAll: function () {
+        const allToDoSort = this.getAll();
         allToDoSort.sort(function (a, b) {
             if (a.data.date > b.data.date) {
                 return 1;
@@ -189,6 +223,16 @@ const ToDoLocalStorage = {
     },
     getByKey: function (key) {
         return JSON.parse(localStorage.getItem(key));
+    },
+    removeAll: function () {
+        const allToDo = this.getAll();
+        for (let i = 0; i < allToDo.length; i++) {
+            let key = allToDo[i].key;
+            localStorage.removeItem(key);
+        }
+    },
+    removeOne: function(key) {
+        localStorage.removeItem(key);
     }
 };
 function filter(filterType, items) {
@@ -203,15 +247,19 @@ function createNewElement(element, elementParent, elementClass) {
     newElement.classList.add(elementClass);
     return newElement;
 }
+let container = document.getElementById('js-container');
 let createToDoBtn = document.getElementById('js-add-todo-btn');
 createToDoBtn.onclick = function () {
     new ToDo().createNew();
 };
 let removeAllToDoBtn = document.getElementById('js-remove-all-todo-btn');
 removeAllToDoBtn.onclick = function () {
-
+    ToDoLocalStorage.removeAll();
+    while (container.hasChildNodes()) {
+        container.removeChild(container.firstChild);
+    }
 };
-const allToDo = ToDoLocalStorage.sortToDo();
+const allToDo = ToDoLocalStorage.sortAll();
 if (allToDo) {
     allToDo.forEach(toDo => {
         new ToDo().createExist(toDo.key, toDo.data);
