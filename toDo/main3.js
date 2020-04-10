@@ -1,4 +1,3 @@
-// (function() {
 function ToDo() {
     const byAll = (item) => item;
     const byDone = (item) => item.isDone;
@@ -6,6 +5,11 @@ function ToDo() {
     const byAbc = function(a, b) {
         if (a.text > b.text) {return 1;}
         if (a.text < b.text) {return -1;}
+        return 0;
+    };
+    const byTime = function(a, b) {
+        if (a.time > b.time) {return 1;}
+        if (a.time < b.time) {return -1;}
         return 0;
     };
     let filterWrapper;
@@ -34,6 +38,12 @@ function ToDo() {
             classes: ['todo-filter-btn-abc'],
             wrapper: () => sortWrapper,
             action: sort.bind(null, byAbc)
+        },
+        {
+            text: 'По времени',
+            classes: ['todo-filter-btn-time', 'active'],
+            wrapper: () => sortWrapper,
+            action: sort.bind(null, byTime)
         }
     ];
     let titleInner;
@@ -87,49 +97,32 @@ function ToDo() {
         let inputWrapper = createNewElement('div', card, 'todo-list-input-wrapper');
         let input = createNewElement('input', inputWrapper, 'todo-list-input');
         input.placeholder = 'Напишите что-нибудь...';
-        input.addEventListener('blur', () => {
-            const inputValue = input.value;
-            if (!inputValue) {
-                return
-            }
-            items.push({
-                text: inputValue,
-                isDone: false
-            });
-            input.value = '';
-            renderList(filter.bind(null, byAll));
-            saveToLocalStorage();
+        input.addEventListener('blur', () => {setListItemText(input, items);});
+        input.addEventListener('keydown', (e) => {if (e.code === "Enter") {setListItemText(input, items);}});
+    };
+    const setListItemText = function(input, items) {
+        const inputValue = input.value;
+        if (!inputValue) {return}
+        items.push({
+            text: inputValue,
+            isDone: false,
+            time: new Date()
         });
-        input.addEventListener('keydown', (e) => {
-            if (e.code === "Enter") {
-                const inputValue = input.value;
-                if (!inputValue) {
-                    return
-                }
-                items.push({
-                    text: inputValue,
-                    isDone: false
-                });
-                input.value = '';
-                renderList(filter.bind(null, byAll));
-                saveToLocalStorage();
-            }
-        });
+        input.value = '';
+        renderList(filter.bind(null, byAll));
+        saveToLocalStorage();
     };
     const createBtns = function(cardFooter) {
         filterWrapper = createNewElement('div', cardFooter, 'todo-filter-wrapper');
         sortWrapper = createNewElement('div', cardFooter, 'todo-sort-wrapper');
         btns.forEach(btn => {
-            createFilterBtn(btn);
-        });
-    };
-    const createFilterBtn = function (btn) {
-        let newBtn = createNewElement('button', btn.wrapper(), 'todo-filter-btn');
-        newBtn.innerText = btn.text;
-        newBtn.classList.add(...btn.classes);
-        newBtn.addEventListener('click', (e) => {
-            toggleBtnClassActive(e.target);
-            renderList(btn.action);
+            let newBtn = createNewElement('button', btn.wrapper(), 'todo-filter-btn');
+            newBtn.innerText = btn.text;
+            newBtn.classList.add(...btn.classes);
+            newBtn.addEventListener('click', (e) => {
+                toggleBtnClassActive(e.target, btn.wrapper());
+                renderList(btn.action);
+            });
         });
     };
     const createDeleteBtn = function (cardFooter, wrapper) {
@@ -138,13 +131,24 @@ function ToDo() {
         deleteBtn.title = 'Удалить лист';
         deleteBtn.addEventListener('click', removeList.bind(null, wrapper));
     };
-    const toggleBtnClassActive = function (target) {
-        let currentActiveBtn = filterWrapper.querySelector('.todo-filter-btn.active');
+    const toggleBtnClassActive = function (target, wrapper) {
+        let currentActiveBtn = wrapper.querySelector('.todo-filter-btn.active');
         currentActiveBtn.classList.remove('active');
         target.classList.add('active');
     };
     const changeListItemStatus = function (filterBy, item) {
         item.isDone = !item.isDone;
+        renderList(filterBy);
+        saveToLocalStorage();
+    };
+    const changeListItemText = function (filterBy, item, e) {
+        item.text = e.target.innerText;
+        renderList(filterBy);
+        saveToLocalStorage();
+    };
+    const deleteListItem = function(filterBy, item) {
+        items.splice(items.indexOf(item), 1);
+        this.remove();
         renderList(filterBy);
         saveToLocalStorage();
     };
@@ -154,9 +158,19 @@ function ToDo() {
         dataForRender.forEach(item => {
             let listItem = createNewElement('li', list, 'todo-list-item');
             let listItemIn = createNewElement('span', listItem, 'todo-list-item-in');
-            listItemIn.innerText = item.text;
+            listItemIn.innerText = '✔';
             listItemIn.onclick = changeListItemStatus.bind(this, action, item);
-            if (item.isDone) {listItemIn.classList.add('done');}
+            let listItemText = createNewElement('span', listItem, 'todo-list-item-text');
+            listItemText.innerText = item.text;
+            listItemText.contentEditable = true;
+            listItemText.onblur = changeListItemText.bind(null, action, item);
+            if (item.isDone) {
+                listItem.classList.add('done');
+                listItemText.contentEditable = false;
+            }
+            let listItemDeleteBtn = createNewElement('button', listItem, 'todo-list-item-delete-btn');
+            listItemDeleteBtn.innerText = 'x';
+            listItemDeleteBtn.onclick = deleteListItem.bind(listItem, action, item);
         });
     };
     const removeList = function(wrapper) {
@@ -265,4 +279,3 @@ if (allToDo) {
         new ToDo().createExist(toDo.key, toDo.data);
     });
 }
-// })();

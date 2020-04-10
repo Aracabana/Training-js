@@ -12,7 +12,7 @@ body {
     display: flex;
     justify-content: flex-start;
     flex-wrap: wrap;
-    margin: 0 -15px;
+    margin: 0 -10px;
 }
 .add-todo-btn {
     position: fixed;
@@ -32,7 +32,8 @@ body {
     background-color: lightgrey;
     cursor: pointer;
 }
-.add-todo-btn:hover, .add-todo-btn:active {
+.add-todo-btn:hover,
+.add-todo-btn:active {
     background-color: darkgrey;
 }
 .remove-todo-btn {
@@ -53,13 +54,14 @@ body {
     background-color: lightgrey;
     cursor: pointer;
 }
-.remove-todo-btn:hover, .remove-todo-btn:active {
+.remove-todo-btn:hover,
+.remove-todo-btn:active {
     background-color: darkgrey;
 }
 .todo-list-wrapper {
     box-sizing: border-box;
     margin-bottom: 40px;
-    padding: 0 15px;
+    padding: 0 10px;
     width: 50%;
 }
 .todo-list-card {
@@ -99,31 +101,47 @@ body {
 .todo-list-item {
     position: relative;
     margin-bottom: 8px;
+    padding-left: 25px;
+    padding-right: 25px;
 }
 .todo-list-item-in {
-    position: relative;
-    padding-left: 25px;
-    cursor: pointer;
-}
-.todo-list-item-in::before {
-    content: '';
     position: absolute;
     left: 0;
-    top: -1px;
+    top: 0;
     border-radius: 2px;
     border: 1px solid #d4d4d4;
     width: 16px;
     height: 16px;
-    line-height: 17px;
+    line-height: 15px;
     text-align: center;
-    color: limegreen;
+    color: transparent;
+    cursor: pointer;
 }
-.todo-list-item-in.done {
+.todo-list-item.done .todo-list-item-text {
     text-decoration: line-through;
     color: limegreen;
 }
-.todo-list-item-in.done::before {
-    content: '\2714';
+.todo-list-item.done .todo-list-item-in {
+    border-color: limegreen;
+    color: limegreen;
+}
+.todo-list-item-delete-btn {
+    position: absolute;
+    right: 0;
+    top: -1px;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-weight: bold;
+    font-size: 14px;
+    color: #101010;
+    background-color: lightgrey;
+    cursor: pointer;
+}
+.todo-list-item-delete-btn:hover,
+.todo-list-item-delete-btn:active {
+    background-color: darkgrey;
 }
 .todo-list-input-wrapper {
     padding: 20px 30px;
