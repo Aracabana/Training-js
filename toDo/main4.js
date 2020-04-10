@@ -1,8 +1,23 @@
+function ToDoItems(value = []) {
+    let items = value;
+    this.add = function(obj) {
+        items.push(obj);
+    };
+    this.changeStatus = function(item) {
+        item.isDone = !item.isDone;
+    };
+    this.changeText = function(item, text) {
+        item.text = text;
+    };
+    this.remove = function(item) {
+        items.splice(items.indexOf(item), 1);
+    }
+}
+
 function ToDo() {
     let actionsQueue = [];
     let filterWrapper;
     let sortWrapper;
-    let designWrapper;
     const btns = [
         {
             text: 'Все',
@@ -38,13 +53,6 @@ function ToDo() {
             wrapper: () => sortWrapper,
             action: sort.bind(null, ToDoActions.sort.byTime),
             type: 'sort'
-        },
-        {
-            text: 'To Up',
-            classes: ['todo-filter-btn-up', 'active'],
-            wrapper: () => designWrapper,
-            action: map.bind(null, ToDoActions.map.toUpCase),
-            type: 'map'
         }
     ];
     let titleInner;
@@ -104,7 +112,6 @@ function ToDo() {
     const createBtns = function(cardFooter) {
         filterWrapper = createNewElement('div', cardFooter, 'todo-filter-wrapper');
         sortWrapper = createNewElement('div', cardFooter, 'todo-sort-wrapper');
-        designWrapper = createNewElement('div', cardFooter, 'todo-design-wrapper');
         btns.forEach(btn => {
             let newBtn = createNewElement('button', btn.wrapper(), 'todo-filter-btn');
             newBtn.innerText = btn.text;
@@ -147,7 +154,7 @@ function ToDo() {
     const setListItemText = function(input, items) {
         const inputValue = input.value;
         if (!inputValue) {return}
-        items.push({
+        items.add({
             text: inputValue,
             isDone: false,
             time: new Date()
@@ -172,6 +179,10 @@ function ToDo() {
         saveToLocalStorage();
     };
     const addActionToQueue = function(action, type) {
+        const z = {
+            action: filter,
+            type: 'filter'
+        };
         let foundAction = actionsQueue.find(action => action.type === type);
         if (foundAction) {
             foundAction.action = action;
@@ -184,7 +195,6 @@ function ToDo() {
         actionsQueue.forEach(item => {
             adaptedData = item.action(adaptedData);
         });
-        console.log(adaptedData);
         return adaptedData;
     };
     const removeList = function(wrapper) {
@@ -200,13 +210,13 @@ function ToDo() {
     };
     this.createNew = function () {
         createHTML();
-        items = [];
+        items = new ToDoItems();
         localStorageKey = ToDoLocalStorage.getNewKey();
     };
     this.createExist = function (key, currentToDo) {
         createHTML();
         localStorageKey = key;
-        items = currentToDo.items;
+        items = new ToDoItems(currentToDo.items);
         setTitleOuter(currentToDo.title);
         addActionToQueue(filter.bind(null, ToDoActions.filter.byAll), 'filter');
         addActionToQueue(sort.bind(null, ToDoActions.sort.byTime), 'sort');
@@ -289,15 +299,6 @@ const ToDoActions = {
             if (a.time < b.time) {return -1;}
             return 0;
         }
-    },
-    map: {
-        toUpCase: (item) => {
-            return {
-                text: item.text.slice(1),
-                isDone: item.isDone,
-                time: item.time
-            };
-        }
     }
 };
 function filter(filterType, items) {
@@ -305,9 +306,6 @@ function filter(filterType, items) {
 }
 function sort(sortType, items) {
     return items.sort(sortType);
-}
-function map(mapType, items) {
-    return items.map(mapType);
 }
 function createNewElement(element, elementParent, elementClass) {
     let newElement = document.createElement(element);
