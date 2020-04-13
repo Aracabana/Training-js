@@ -1,6 +1,12 @@
 body {
     font-family: sans-serif;
 }
+.calendar-wrapper {
+    margin-bottom: 20px;
+}
+.calendar-wrapper:last-child {
+    margin-bottom: 0;
+}
 .calendar-month {
     font-size: 20px;
     text-align: center;
