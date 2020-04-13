@@ -62,7 +62,7 @@ body {
     box-sizing: border-box;
     margin-bottom: 40px;
     padding: 0 10px;
-    width: 100%;
+    width: 50%;
 }
 .todo-list-card {
     position: relative;
@@ -192,6 +192,7 @@ body {
     font-size: 12px;
     color: #ffffff;
     background-color: firebrick;
+    cursor: pointer;
 }
 .todo-footer-btn-delete:hover,
 .todo-footer-btn-delete:active {

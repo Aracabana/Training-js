@@ -38,13 +38,6 @@ function ToDo() {
             wrapper: () => sortWrapper,
             action: sort.bind(null, ToDoActions.sort.byTime),
             type: 'sort'
-        },
-        {
-            text: 'To Up',
-            classes: ['todo-filter-btn-up', 'active'],
-            wrapper: () => designWrapper,
-            action: map.bind(null, ToDoActions.map.toUpCase),
-            type: 'map'
         }
     ];
     let titleInner;
@@ -112,7 +105,7 @@ function ToDo() {
             newBtn.addEventListener('click', (e) => {
                 toggleBtnClassActive(e.target, btn.wrapper());
                 addActionToQueue(btn.action, btn.type);
-                renderList(); //ничего не передаем
+                renderList();
             });
         });
     };
@@ -135,7 +128,7 @@ function ToDo() {
         let listItemText = createNewElement('span', listItem, 'todo-list-item-text');
         listItemText.innerText = item.text;
         listItemText.contentEditable = true;
-        listItemText.onblur = changeListItemText.bind(null, item);
+        listItemText.addEventListener('blur', changeListItemText.bind(null, item));
         if (item.isDone) {
             listItem.classList.add('done');
             listItemText.contentEditable = false;
@@ -184,7 +177,6 @@ function ToDo() {
         actionsQueue.forEach(item => {
             adaptedData = item.action(adaptedData);
         });
-        console.log(adaptedData);
         return adaptedData;
     };
     const removeList = function(wrapper) {
@@ -289,15 +281,6 @@ const ToDoActions = {
             if (a.time < b.time) {return -1;}
             return 0;
         }
-    },
-    map: {
-        toUpCase: (item) => {
-            return {
-                text: item.text.slice(1),
-                isDone: item.isDone,
-                time: item.time
-            };
-        }
     }
 };
 function filter(filterType, items) {
@@ -305,9 +288,6 @@ function filter(filterType, items) {
 }
 function sort(sortType, items) {
     return items.sort(sortType);
-}
-function map(mapType, items) {
-    return items.map(mapType);
 }
 function createNewElement(element, elementParent, elementClass) {
     let newElement = document.createElement(element);

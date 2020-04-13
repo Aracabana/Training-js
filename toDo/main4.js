@@ -1,3 +1,4 @@
+/*
 function ToDoItems(value = []) {
     let items = value;
     this.add = function(obj) {
@@ -331,3 +332,4 @@ if (allToDo) {
         new ToDo().createExist(toDo.key, toDo.data);
     });
 }
+*/
