@@ -1,0 +1,38 @@
+body {
+    font-family: sans-serif;
+}
+.calendar-month {
+    font-size: 20px;
+    text-align: center;
+}
+.calendar {
+    border: 1px solid #dddddd;
+    width: 100%;
+}
+.calendar-day-name {
+    border: 1px solid #dddddd;
+    padding: 10px;
+    font-weight: bold;
+    text-align: center;
+}
+.calendar-day {
+    border: 1px solid #dddddd;
+    padding: 10px;
+}
+.calendar-day-date {
+    display: inline-block;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 25px;
+    text-align: center;
+}
+.calendar-day.current .calendar-day-date {
+    color: #ffffff;
+    background-color: darkblue;
+}
+.calendar-day.before .calendar-day-date {
+    color: darkgrey;
+}
