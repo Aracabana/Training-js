@@ -20,10 +20,6 @@ const calendarData = {
     dayNames: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
 };
 function Calendar() {
-    // const currentYear = year;
-    // this.currentMonth = monthNumber;
-    // const currentIsPreviousMonth = isPreviousMonth;
-    // const currentIsCurrentMonth = isCurrentMonth;
     let monthName;
     let tbody;
     let daysByWeeks = [];
@@ -46,22 +42,18 @@ function Calendar() {
     };
     const setDays = function (year, month) {
         let days = [];
-        //записываем дни месяца в массив
         for (let i = 1; i <= getMonthLength(year, month); i++) {
             days.push(i);
         }
-        //сдвигаем первый день месяца на нужную позицию
         for (let i = 0; i < getFirstDay(year, month); i++) {
             days.unshift('');
         }
-        //добавляем пустые элементы в конец массива, чтобы длина массива дней была кратна 7
         const emptyCellsCount = calendarData.dayNames.length - (days.length % 7);
         if (getLastDay(year, month) !== 6) {
             for (let i = 0; i < emptyCellsCount; i++) {
                 days.push('');
             }
         }
-        //разбиваем массив дней на недели
         while(days.length) {daysByWeeks.push(days.splice(0, calendarData.dayNames.length));}
         return daysByWeeks;
     };
@@ -102,6 +94,7 @@ function Calendar() {
         this.render(year, month, isCurrentMonth, isPreviousMonth);
     };
 }
+
 let monthNumber = new Date().getMonth();
 let isCurrentMonth = true;
 let isPreviousMonth = false;
