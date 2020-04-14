@@ -1,3 +1,4 @@
+/*
 const app = document.getElementById('app');
 function createNewElementAppend(element, elementParent, elementClass) {
     let newElement = document.createElement(element);
@@ -104,3 +105,4 @@ for (let i = 0; i < 12; i++) {
     new Calendar(new Date().getFullYear(), i, isPreviousMonth, isCurrentMonth).create();
 }
 
+*/

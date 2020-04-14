@@ -1,8 +1,8 @@
 body {
     font-family: sans-serif;
 }
-.calendar-wrapper {
-    margin-bottom: 20px;
+.app {
+    position: relative;
 }
 .calendar-wrapper:last-child {
     margin-bottom: 0;
@@ -41,4 +41,29 @@ body {
 }
 .calendar-day.before .calendar-day-date {
     color: darkgrey;
+}
+.btns-wrapper {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    text-align: center;
+}
+.btns-wrapper button {
+    position: absolute;
+    top: 8px;
+    width: 40px;
+    height: 30px;
+    font-weight: bold;
+    font-size: 20px;
+    cursor: pointer;
+}
+.btns-wrapper button:disabled {
+    cursor: not-allowed;
+}
+.btn-prev {
+    left: 8px;
+}
+.btn-next {
+    right: 8px;
 }
