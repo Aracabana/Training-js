@@ -1,3 +1,5 @@
+import {PopupNew, PopupExist} from './main4.js';
+
 const app = document.getElementById('app');
 function createNewElementAppend(element, elementParent, elementClass) {
     let newElement = document.createElement(element);
@@ -78,6 +80,11 @@ function Calendar(year, month, isCurrentMonth, isPreviousMonth) {
             let tbodyTr = createNewElementAppend('tr', tbody, '');
             for (let j = 0; j < tbodyData[i].length; j++) {
                 let tbodyDay = createNewElementAppend('td', tbodyTr, 'calendar-day');
+                if (!this.isPrevMonth) {
+                    tbodyDay.addEventListener('click', () => {
+                        new PopupNew().create();
+                    });
+                }
                 let tbodyDayDate = createNewElementAppend('span', tbodyDay, 'calendar-day-date');
                 tbodyDayDate.innerText = tbodyData[i][j];
                 if (this.isCurMonth && tbodyData[i][j] === new Date().getDate()) {

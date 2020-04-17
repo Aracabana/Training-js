@@ -46,6 +46,12 @@ body {
 .calendar-day.before .calendar-day-date {
     color: darkgrey;
 }
+.calendar-day:not(.before) {
+    cursor: pointer;
+}
+.calendar-day:not(.before):hover {
+    background-color: #d4d4d4;
+}
 .btns-wrapper {
     position: absolute;
     left: 0;

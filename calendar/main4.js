@@ -1,4 +1,4 @@
-const app = document.getElementById('app');
+/*const app = document.getElementById('app');
 function createNewElementAppend(element, elementParent, elementClass) {
     let newElement = document.createElement(element);
     elementParent.appendChild(newElement);
@@ -14,33 +14,15 @@ function createNewElementPrepend(element, elementParent, elementClass) {
         newElement.classList.add(elementClass);
     }
     return newElement;
-}
+}*/
 
 function Popup() {
     let bg;
-    let title;
-    let eventName;
-    let eventDate;
-    let eventTime;
-    let saveBtn;
-    const createHTML = function() {
-        bg = createNewElementAppend('div', app, 'popup-bg');
-        const wrapper = createNewElementAppend('div', bg, 'popup-wrapper');
-        const content = createNewElementAppend('div', wrapper, 'popup-content');
-        const closeBtn = createNewElementAppend('button', content, 'popup-close-btn');
-        closeBtn.innerText = 'X';
-        closeBtn.addEventListener('click', remove);
-        title = createNewElementAppend('h2', content, 'popup-title');
-        eventName = createNewElementAppend('input', content, 'popup-event-name');
-        eventDate = createNewElementAppend('input', content, 'popup-event-date');
-        eventDate.type = 'date';
-        eventDate.min = setMinValueForDate();
-        eventDate.max = setMaxValueForDate();
-        eventTime = createNewElementAppend('input', content, 'popup-event-time');
-        eventTime.type = 'time';
-        saveBtn = createNewElementAppend('button', content, 'popup-save-btn');
-        saveBtn.innerText = 'Сохранить';
-    };
+    this.title = null;
+    this.eventName = null;
+    this.eventDate = null;
+    this.eventTime = null;
+    this.saveBtn = null;
     const setMinValueForDate = function() {
         let today = new Date();
         let dd = today.getDate();
@@ -59,39 +41,62 @@ function Popup() {
         let yyyy = today.getFullYear();
         return yyyy + '-' + 12 + '-' + 31;
     };
-    this.createNew = function() {
-        createHTML();
-        title.innerText = 'Добавить событие';
-        eventName.placeholder = 'Введите название события';
-        eventDate.placeholder = 'Выберите дату';
-        eventTime.placeholder = 'Выберите время';
-        saveBtn.addEventListener('click', function() {
-            new Event(eventName.value, eventDate.value, eventTime.value).createNew();
-            remove();
-        });
+    this.createHTML = function() {
+        bg = createNewElementAppend('div', app, 'popup-bg');
+        const wrapper = createNewElementAppend('div', bg, 'popup-wrapper');
+        const content = createNewElementAppend('div', wrapper, 'popup-content');
+        const closeBtn = createNewElementAppend('button', content, 'popup-close-btn');
+        closeBtn.innerText = 'X';
+        closeBtn.addEventListener('click', this.remove);
+        this.title = createNewElementAppend('h2', content, 'popup-title');
+        this.eventName = createNewElementAppend('input', content, 'popup-event-name');
+        this.eventDate = createNewElementAppend('input', content, 'popup-event-date');
+        this.eventDate.type = 'date';
+        this.eventDate.min = setMinValueForDate();
+        this.eventDate.max = setMaxValueForDate();
+        this.eventTime = createNewElementAppend('input', content, 'popup-event-time');
+        this.eventTime.type = 'time';
+        this.saveBtn = createNewElementAppend('button', content, 'popup-save-btn');
+        this.saveBtn.innerText = 'Сохранить';
     };
-    this.createExist = function(name, date, time, key) {
-        createHTML();
-        title.innerText = 'Редактировать событие';
-        eventName.value = name;
-        eventDate.value = date;
-        eventTime.value = time;
-        saveBtn.addEventListener('click', function() {
-            const data = {
-                title: eventName.value,
-                date: eventDate.value,
-                time: eventTime.value
-            };
-            const dataForUpdate = JSON.stringify(data);
-            EventLocalStorage.updateOne(key, dataForUpdate);
-            updateEvent(key, data);
-            remove();
-        });
-    };
-    const remove = function() {
+    this.remove = function() {
         bg.remove();
     }
 }
+
+export function PopupNew() {
+    this.create = function() {
+        this.createHTML();
+        this.title.innerText = 'Добавить событие';
+        this.eventName.placeholder = 'Введите название события';
+        this.eventDate.placeholder = 'Выберите дату';
+        this.eventTime.placeholder = 'Выберите время';
+        this.saveBtn.addEventListener('click', () => {
+            new Event(this.eventName.value, this.eventDate.value, this.eventTime.value).createNew();
+            this.remove();
+        });
+    }
+}
+PopupNew.prototype = new Popup();
+export function PopupExist() {
+    this.create = function(event) {
+        this.createHTML();
+        this.title.innerText = 'Редактировать событие';
+        this.eventName.value = event.name;
+        this.eventDate.value = event.date;
+        this.eventTime.value = event.time;
+        this.saveBtn.addEventListener('click', () => {
+            const data = {
+                title: this.eventName.value,
+                date: this.eventDate.value,
+                time: this.eventTime.value
+            };
+            event.updateEvent(data);
+            this.remove();
+        });
+    }
+}
+PopupExist.prototype = new Popup();
 
 function Event(eventName, eventDate, eventTime) {
     this.name = eventName;
@@ -101,7 +106,7 @@ function Event(eventName, eventDate, eventTime) {
     let title;
     let date;
     let time;
-    let localStorageKey = '';
+    this.localStorageKey = '';
     const createHTML = () => {
         wrapper = createNewElementAppend('div', app, 'event');
         title = createNewElementAppend('p', wrapper, 'event-title');
@@ -112,14 +117,14 @@ function Event(eventName, eventDate, eventTime) {
         time.innerText = this.time;
         const deleteBtn = createNewElementAppend('button', wrapper, 'event-delete-btn');
         deleteBtn.innerText = 'x';
-        deleteBtn.addEventListener('click', function() {
+        deleteBtn.addEventListener('click', () => {
             wrapper.remove();
-            EventLocalStorage.removeOne(localStorageKey);
+            EventLocalStorage.removeOne(this.localStorageKey);
         });
         const editBtn = createNewElementAppend('button', wrapper, 'event-edit-btn');
         editBtn.innerText = '✎';
         editBtn.addEventListener('click', () => {
-            new Popup().createExist(this.name, this.date, this.time, localStorageKey);
+            new PopupExist().create(this);
         });
     };
     const saveToLocalStorage = () => {
@@ -129,19 +134,24 @@ function Event(eventName, eventDate, eventTime) {
             time: this.time
         };
         const eventForSaveJSON = JSON.stringify(eventForSave);
-        localStorage.setItem(localStorageKey, eventForSaveJSON);
+        localStorage.setItem(this.localStorageKey, eventForSaveJSON);
     };
     this.createNew = function() {
         createHTML();
-        localStorageKey = EventLocalStorage.getNewKey();
-        wrapper.id = localStorageKey;
+        this.localStorageKey = EventLocalStorage.getNewKey();
         saveToLocalStorage();
     };
     this.createExist = function (key) {
         createHTML();
-        localStorageKey = key;
-        wrapper.id = localStorageKey;
+        this.localStorageKey = key;
     };
+    this.updateEvent = function(data) {
+        title.innerText = data.title;
+        date.innerText = data.date;
+        time.innerText = data.time;
+        const dataForUpdate = JSON.stringify(data);
+        EventLocalStorage.updateOne(this.localStorageKey, dataForUpdate);
+    }
 }
 
 const EventLocalStorage = {
@@ -193,7 +203,7 @@ const EventLocalStorage = {
 const addEventBtn = createNewElementAppend('button', app, 'add-event-btn');
 addEventBtn.innerText = 'Добавить событие';
 addEventBtn.addEventListener('click', function () {
-    new Popup().createNew();
+    new PopupNew().create();
 });
 
 const allEvents = EventLocalStorage.getAll();
@@ -203,12 +213,3 @@ if (allEvents) {
     });
 }
 
-function updateEvent(id, data) {
-    let event = document.getElementById(id);
-    let eventName = event.querySelector('.event-title');
-    eventName.innerText = data.title;
-    let eventDate = event.querySelector('.event-date');
-    eventDate.innerText = data.date;
-    let eventTime = event.querySelector('.event-time');
-    eventTime.innerText = data.time;
-}
