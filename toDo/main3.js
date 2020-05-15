@@ -279,8 +279,8 @@ const ToDoActions = {
     },
     sort: {
         byAbc: function(a, b) {
-            let textA = a.text.toLowerCase();
-            let textB = b.text.toLocaleLowerCase();
+            let textA = a.text.toLowerCase().replace('ё','е'+String.fromCharCode(1110));
+            let textB = b.text.toLocaleLowerCase().replace('ё','е'+String.fromCharCode(1110));
             if (textA > textB) {return 1;}
             if (textA < textB) {return -1;}
             return 0;
