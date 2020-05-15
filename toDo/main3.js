@@ -129,6 +129,13 @@ function ToDo() {
         listItemText.innerText = item.text;
         listItemText.contentEditable = true;
         listItemText.addEventListener('blur', changeListItemText.bind(null, item));
+        listItemText.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.stopPropagation();
+                e.preventDefault();
+                changeListItemText.bind(null, item)
+            }
+        });
         if (item.isDone) {
             listItem.classList.add('done');
             listItemText.contentEditable = false;
@@ -272,8 +279,10 @@ const ToDoActions = {
     },
     sort: {
         byAbc: function(a, b) {
-            if (a.text > b.text) {return 1;}
-            if (a.text < b.text) {return -1;}
+            let textA = a.text.toLowerCase();
+            let textB = b.text.toLocaleLowerCase();
+            if (textA > textB) {return 1;}
+            if (textA < textB) {return -1;}
             return 0;
         },
         byTime: function(a, b) {
