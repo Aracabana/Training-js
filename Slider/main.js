@@ -33,10 +33,10 @@ function Slider(sliderWrapper) {
     }
 }
 
-let sliderWrapper = document.getElementById('slider');
-let slider = new Slider(sliderWrapper);
-slider.createSliderIn();
-slider.moveSlides();
+// let sliderWrapper = document.getElementById('slider');
+// let slider = new Slider(sliderWrapper);
+// slider.createSliderIn();
+// slider.moveSlides();
 
 /*window.onload = function() {
     let slider = document.getElementById('slider');

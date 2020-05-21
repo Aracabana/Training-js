@@ -1,15 +1,15 @@
-#slider {
+.slider-wrapper {
     overflow: hidden;
+    outline: 1px solid red;
 }
-.slider-in {
+.slider {
     overflow: hidden;
-    margin-bottom: 20px;
-    width: auto;
+    display: flex;
+    justify-content: flex-start;
     transition: all linear 0.5s;
 }
 .slide {
-    float: left;
+    flex-shrink: 0;
     box-sizing: border-box;
-    width: 100%;
     padding: 20px;
 }
