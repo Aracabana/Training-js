@@ -24,6 +24,11 @@ function Slider() {
     let _slides;
     let _slideWidth = 0;
     let _activeSlide;
+    let _pagination;
+    let _paginationBullets = [];
+    let _paginationCounterCurrent;
+    // let _paginationCounterDivider;
+    // let _paginationCounterTotal;
     let _options = {
         slidesToShow: 1,
         slidesToScroll: 1,
@@ -32,9 +37,14 @@ function Slider() {
         arrowPrev: '←',
         arrowNext: '→',
         firstSlideIndex: 0,
-        loop: false
+        activeSlideClassName: 'slide-active',
+        loop: false,
+        pagination: true,
+        paginationType: 'counter', //'bullets'
+        paginationCounterDivider: '/'
     };
-    let translateValue = 0;
+    let _translateValueFormula;
+    let _translateValue = 0;
     const setOptions = function (options) {
         for (let key in options) {
             if (options.hasOwnProperty(key))  {
@@ -65,7 +75,20 @@ function Slider() {
         })
         _slider.style.width = _sliderWidth + 'px';
     };
+    const changeSlideClass = function(direction) {
+        _slides[_activeSlide].classList.remove(_options.activeSlideClassName);
+        if (direction === 'next') {
+            _activeSlide += _options.slidesToScroll;
+        } else {
+            _activeSlide -= _options.slidesToScroll;
+        }
+        _slides[_activeSlide].classList.add(_options.activeSlideClassName);
+    };
+    const showSlide = function () {
+        _slider.style.transform = 'translateX(' + _translateValue + 'px)';
+    };
     const createArrows = function() {
+        _translateValueFormula = (_slideWidth + _options.spaceBetweenSlides) * _options.slidesToScroll;
         let arrowPrev = createNewElementAppend('button', _sliderWrapper, ['slider-arrow', 'slider-arrow-prev']);
         arrowPrev.innerHTML = _options.arrowPrev;
         if ((!_options.loop) && _options.firstSlideIndex === 0) {
@@ -75,8 +98,11 @@ function Slider() {
             if (arrowNext.getAttribute('disabled')) {
                 arrowNext.removeAttribute("disabled");
             }
-            showPrevSlide();
-            if ((!_options.loop) && translateValue >= 0) {
+            _translateValue += _translateValueFormula;
+            changeSlideClass('prev');
+            showSlide();
+            updatePagination();
+            if ((!_options.loop) && _translateValue >= 0) {
                 this.setAttribute("disabled", true);
             }
         });
@@ -89,19 +115,43 @@ function Slider() {
             if (arrowPrev.getAttribute('disabled')) {
                 arrowPrev.removeAttribute("disabled");
             }
-            showNextSlide();
-            if ((!_options.loop) && translateValue <= -(_sliderWidth - _slideWidth)) {
+            _translateValue -= _translateValueFormula;
+            changeSlideClass('next');
+            showSlide();
+            updatePagination();
+            if ((!_options.loop) && _translateValue <= -(_sliderWidth - _slideWidth)) {
                 this.setAttribute("disabled", true);
             }
         });
     };
-    const showPrevSlide = function () {
-        translateValue += _slideWidth * _options.slidesToScroll;
-        _slider.style.transform = 'translateX(' + translateValue + 'px)';
+    const createPagination = function() {
+        if (_options.paginationType === 'bullets') {
+            _pagination = createNewElementAppend('ul', _sliderWrapper, ['slider-pagination']);
+            for (let i = 0; i < _slides.length; i++) {
+                let _paginationBullet = createNewElementAppend('li', _pagination, ['slider-pagination-bullet']);
+                let _paginationBulletBtn = createNewElementAppend('button', _paginationBullet, ['slider-pagination-bullet-btn']);
+                _paginationBulletBtn.innerText = i + 1;
+                _paginationBullets.push(_paginationBullet);
+            }
+            console.log(_paginationBullets);
+        }
+        if (_options.paginationType === 'counter') {
+            _pagination = createNewElementAppend('p', _sliderWrapper, ['slider-pagination']);
+            _paginationCounterCurrent = createNewElementAppend('span', _pagination, ['slider-pagination-current']);
+            updatePagination();
+            const _paginationCounterDivider = createNewElementAppend('span', _pagination, ['slider-pagination-divider']);
+            _paginationCounterDivider.innerText = ' ' + _options.paginationCounterDivider + ' ';
+            const _paginationCounterTotal = createNewElementAppend('span', _pagination, ['slider-pagination-total']);
+            _paginationCounterTotal.innerText = _slides.length;
+        }
     };
-    const showNextSlide = function () {
-        translateValue -= _slideWidth * _options.slidesToScroll;
-        _slider.style.transform = 'translateX(' + translateValue + 'px)';
+    const updatePagination = function() {
+        if (_options.paginationType === 'bullets') {
+        
+        }
+        if (_options.paginationType === 'counter') {
+            _paginationCounterCurrent.innerText = _activeSlide + 1;
+        }
     };
     
     
@@ -109,21 +159,22 @@ function Slider() {
         _sliderWrapper = document.querySelector(sliderWrapper);
         _sliderWrapperWidth = _sliderWrapper.offsetWidth;
         _slides = Array.from(_sliderWrapper.children);
-        _activeSlide = _options.firstSlideIndex;
-        _slides[_activeSlide].classList.add('slide-active');
         setOptions(options);
+        _activeSlide = _options.firstSlideIndex;
+        _slides[_activeSlide].classList.add(_options.activeSlideClassName);
         setSlideWidth();
         create();
+        if (_options.firstSlideIndex > 0 && _options.firstSlideIndex <= _slides.length - 1) {
+            _translateValue -= (_slideWidth + _options.spaceBetweenSlides) * _options.firstSlideIndex;
+            showSlide();
+        }
         if (_options.arrows) {
             createArrows();
+        }
+        if (_options.pagination) {
+            createPagination();
         }
     };
 }
 
-let slider = new Slider().init('#slider', {
-    // slidesToShow: 1,
-    // slidesToScroll: 1,
-    // spaceBetweenSlides: 0,
-    // arrowPrev: '<span>Previous</span>',
-    // arrowNext: '<span>Next</span>'
-});
+
