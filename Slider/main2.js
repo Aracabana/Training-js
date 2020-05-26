@@ -14,8 +14,6 @@ function createNewElementPrepend(element, elementParent, elementClasses) {
     }
     return newElement;
 }
-
-
 function Slider() {
     let _sliderWrapper;
     let _sliderWrapperWidth = 0;
@@ -38,6 +36,7 @@ function Slider() {
         arrowNext: '→',
         firstSlideIndex: 0,
         activeSlideClassName: 'slide-active',
+        activeBulletClassName: 'slider-pagination-bullet-active',
         loop: false,
         pagination: true,
         paginationType: 'counter', //'bullets'
@@ -47,9 +46,9 @@ function Slider() {
     let _translateValue = 0;
     const setOptions = function (options) {
         for (let key in options) {
-            if (options.hasOwnProperty(key))  {
+            if (options.hasOwnProperty(key)) {
                 for (let _key in _options) {
-                    if (_options.hasOwnProperty(_key))  {
+                    if (_options.hasOwnProperty(_key)) {
                         if (key === _key) {
                             _options[_key] = options[key];
                         }
@@ -58,13 +57,13 @@ function Slider() {
             }
         }
     };
-    const setSlideWidth = function() {
-        _slideWidth = (_sliderWrapperWidth - (_options.spaceBetweenSlides * (_options.slidesToShow - 1))) / _options.slidesToShow ;
+    const setSlideWidth = function () {
+        _slideWidth = (_sliderWrapperWidth - (_options.spaceBetweenSlides * (_options.slidesToShow - 1))) / _options.slidesToShow;
         _slides.forEach((slide) => {
             slide.style.width = _slideWidth + 'px';
         })
     };
-    const create = function() {
+    const create = function () {
         _slider = createNewElementPrepend('div', _sliderWrapper, ['slider']);
         _slides.forEach((slide) => {
             _sliderWidth += slide.offsetWidth + _options.spaceBetweenSlides;
@@ -75,33 +74,41 @@ function Slider() {
         })
         _slider.style.width = _sliderWidth + 'px';
     };
-    const changeSlideClass = function(direction) {
+    const changeSlideClass = function (direction) {
         _slides[_activeSlide].classList.remove(_options.activeSlideClassName);
+        if (_options.pagination && _options.paginationType === 'bullets') {
+            _paginationBullets[_activeSlide].classList.remove(_options.activeBulletClassName);
+        }
         if (direction === 'next') {
             _activeSlide += _options.slidesToScroll;
         } else {
             _activeSlide -= _options.slidesToScroll;
         }
         _slides[_activeSlide].classList.add(_options.activeSlideClassName);
+        if (_options.pagination && _options.paginationType === 'bullets') {
+            _paginationBullets[_activeSlide].classList.add(_options.activeBulletClassName);
+        }
     };
     const showSlide = function () {
         _slider.style.transform = 'translateX(' + _translateValue + 'px)';
     };
-    const createArrows = function() {
+    const createArrows = function () {
         _translateValueFormula = (_slideWidth + _options.spaceBetweenSlides) * _options.slidesToScroll;
         let arrowPrev = createNewElementAppend('button', _sliderWrapper, ['slider-arrow', 'slider-arrow-prev']);
         arrowPrev.innerHTML = _options.arrowPrev;
         if ((!_options.loop) && _options.firstSlideIndex === 0) {
             arrowPrev.setAttribute("disabled", true);
         }
-        arrowPrev.addEventListener('click', function() {
+        arrowPrev.addEventListener('click', function () {
             if (arrowNext.getAttribute('disabled')) {
                 arrowNext.removeAttribute("disabled");
             }
             _translateValue += _translateValueFormula;
             changeSlideClass('prev');
             showSlide();
-            updatePagination();
+            if (_options.pagination && _options.paginationType === 'counter') {
+                updateCounterPagination();
+            }
             if ((!_options.loop) && _translateValue >= 0) {
                 this.setAttribute("disabled", true);
             }
@@ -111,51 +118,59 @@ function Slider() {
         if ((!_options.loop) && _options.firstSlideIndex === _slides.length - 1) {
             arrowNext.setAttribute("disabled", true);
         }
-        arrowNext.addEventListener('click', function() {
+        arrowNext.addEventListener('click', function () {
             if (arrowPrev.getAttribute('disabled')) {
                 arrowPrev.removeAttribute("disabled");
             }
             _translateValue -= _translateValueFormula;
             changeSlideClass('next');
             showSlide();
-            updatePagination();
+            if (_options.pagination && _options.paginationType === 'counter') {
+                updateCounterPagination();
+            }
             if ((!_options.loop) && _translateValue <= -(_sliderWidth - _slideWidth)) {
                 this.setAttribute("disabled", true);
             }
         });
     };
-    const createPagination = function() {
-        if (_options.paginationType === 'bullets') {
-            _pagination = createNewElementAppend('ul', _sliderWrapper, ['slider-pagination']);
-            for (let i = 0; i < _slides.length; i++) {
-                let _paginationBullet = createNewElementAppend('li', _pagination, ['slider-pagination-bullet']);
-                let _paginationBulletBtn = createNewElementAppend('button', _paginationBullet, ['slider-pagination-bullet-btn']);
-                _paginationBulletBtn.innerText = i + 1;
-                _paginationBullets.push(_paginationBullet);
-            }
-            console.log(_paginationBullets);
+    const createBulletsPagination = function () {
+        _pagination = createNewElementAppend('ul', _sliderWrapper, ['slider-pagination']);
+        for (let i = 0; i < _slides.length; i++) {
+            let _paginationBullet = createNewElementAppend('li', _pagination, ['slider-pagination-bullet']);
+            let _paginationBulletBtn = createNewElementAppend('button', _paginationBullet, ['slider-pagination-bullet-btn']);
+            _paginationBulletBtn.innerText = i + 1;
+            _paginationBulletBtn.addEventListener('click', function () {
+                let _prevActiveSlide = _activeSlide;
+                _paginationBullets[_activeSlide].classList.remove(_options.activeBulletClassName);
+                _slides[_activeSlide].classList.remove(_options.activeSlideClassName);
+                _activeSlide = i;
+                _translateValueFormula = (_slideWidth + _options.spaceBetweenSlides) * Math.abs(_activeSlide - _prevActiveSlide);
+                if (_prevActiveSlide < _activeSlide) {
+                    _translateValue -= _translateValueFormula;
+                } else if (_prevActiveSlide > _activeSlide) {
+                    _translateValue += _translateValueFormula;
+                }
+                showSlide();
+                this.parentElement.classList.add(_options.activeBulletClassName);
+                _slides[_activeSlide].classList.add(_options.activeSlideClassName);
+            });
+            _paginationBullets.push(_paginationBullet);
         }
-        if (_options.paginationType === 'counter') {
-            _pagination = createNewElementAppend('p', _sliderWrapper, ['slider-pagination']);
-            _paginationCounterCurrent = createNewElementAppend('span', _pagination, ['slider-pagination-current']);
-            updatePagination();
-            const _paginationCounterDivider = createNewElementAppend('span', _pagination, ['slider-pagination-divider']);
-            _paginationCounterDivider.innerText = ' ' + _options.paginationCounterDivider + ' ';
-            const _paginationCounterTotal = createNewElementAppend('span', _pagination, ['slider-pagination-total']);
-            _paginationCounterTotal.innerText = _slides.length;
-        }
+        _paginationBullets[_activeSlide].classList.add(_options.activeBulletClassName);
     };
-    const updatePagination = function() {
-        if (_options.paginationType === 'bullets') {
-        
-        }
-        if (_options.paginationType === 'counter') {
-            _paginationCounterCurrent.innerText = _activeSlide + 1;
-        }
+    const createCounterPagination = function () {
+        _pagination = createNewElementAppend('p', _sliderWrapper, ['slider-pagination']);
+        _paginationCounterCurrent = createNewElementAppend('span', _pagination, ['slider-pagination-current']);
+        updateCounterPagination();
+        const _paginationCounterDivider = createNewElementAppend('span', _pagination, ['slider-pagination-divider']);
+        _paginationCounterDivider.innerText = ' ' + _options.paginationCounterDivider + ' ';
+        const _paginationCounterTotal = createNewElementAppend('span', _pagination, ['slider-pagination-total']);
+        _paginationCounterTotal.innerText = _slides.length;
+    }
+    const updateCounterPagination = function () {
+        _paginationCounterCurrent.innerText = _activeSlide + 1;
     };
-    
-    
-    this.init = function(sliderWrapper, options) {
+    this.init = function (sliderWrapper, options) {
         _sliderWrapper = document.querySelector(sliderWrapper);
         _sliderWrapperWidth = _sliderWrapper.offsetWidth;
         _slides = Array.from(_sliderWrapper.children);
@@ -172,7 +187,12 @@ function Slider() {
             createArrows();
         }
         if (_options.pagination) {
-            createPagination();
+            if (_options.paginationType === 'counter') {
+                createCounterPagination();
+            }
+            if (_options.paginationType === 'bullets') {
+                createBulletsPagination();
+            }
         }
     };
 }

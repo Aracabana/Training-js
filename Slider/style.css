@@ -13,10 +13,16 @@
     box-sizing: border-box;
     padding: 20px;
 }
+.slide-active {
+    outline: 1px solid black;
+}
 .slider-pagination {
     list-style: none;
     padding-left: 0;
 }
 .slider-pagination-bullet {
     display: inline-block;
+}
+.slider-pagination-bullet-active .slider-pagination-bullet-btn {
+    background-color: teal;
 }
