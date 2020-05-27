@@ -100,9 +100,6 @@ function Slider() {
     };
     const createArrows = function () {
         let slideIndex = 0;
-        let checkLeftTranslate = false;
-        let checkRightTranslate = false;
-        // let _translateValueFormula = _slideOuterWidth * _options.slidesToScroll;
         
         arrowPrev = createNewElementAppend('button', _sliderWrapper, ['slider-arrow', 'slider-arrow-prev']);
         arrowPrev.innerHTML = _options.arrowPrev;
@@ -113,19 +110,15 @@ function Slider() {
             slideIndex = _activeSlide - 1;
             _prevPaginationIndex = _paginationIndex;
             _paginationIndex -= 1;
-            if (!checkRightTranslate) {
+            if (_activeSlide < _options.slidesToScroll) {
+                _translateValue += _slideOuterWidth;
+            }
+            else {
                 _translateValue += _slideOuterWidth * _options.slidesToScroll;
-                console.log(_translateValue);
                 slideIndex = _activeSlide - _options.slidesToScroll;
             }
             changeActiveSlide(slideIndex);
             showSlide();
-            console.log(_activeSlide);
-            if (((_slidesCount - 1) - _activeSlide) < _options.slidesToShow * 2) {
-                // console.log('hello');
-                // _translateValue += _slideOuterWidth;
-                checkRightTranslate = true;
-            }
         });
         
         arrowNext = createNewElementAppend('button', _sliderWrapper, ['slider-arrow', 'slider-arrow-next']);
@@ -137,16 +130,15 @@ function Slider() {
             slideIndex = _activeSlide + 1;
             _prevPaginationIndex = _paginationIndex;
             _paginationIndex += 1;
-            if (!checkLeftTranslate) {
+            const nextSlideCounter = (_slidesCount - 1) - (_activeSlide  + _options.slidesToScroll);
+            if (nextSlideCounter < _options.slidesToShow) {
+                _translateValue -= _slideOuterWidth;
+            } else {
                 _translateValue -= _slideOuterWidth * _options.slidesToScroll;
                 slideIndex = _activeSlide + _options.slidesToScroll;
             }
             changeActiveSlide(slideIndex);
             showSlide();
-            if (((_slidesCount - 1) - _activeSlide) < _options.slidesToShow * 2) {
-                _translateValue -= _slideOuterWidth;
-                checkLeftTranslate = true;
-            }
         });
     };
     const updateArrows = function () {
