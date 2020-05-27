@@ -100,7 +100,9 @@ function Slider() {
     };
     const createArrows = function () {
         let slideIndex = 0;
-        let _translateValueFormula = _slideOuterWidth * _options.slidesToScroll;
+        let checkLeftTranslate = false;
+        let checkRightTranslate = false;
+        // let _translateValueFormula = _slideOuterWidth * _options.slidesToScroll;
         
         arrowPrev = createNewElementAppend('button', _sliderWrapper, ['slider-arrow', 'slider-arrow-prev']);
         arrowPrev.innerHTML = _options.arrowPrev;
@@ -108,12 +110,22 @@ function Slider() {
             arrowPrev.disabled = true;
         }
         arrowPrev.addEventListener('click', function () {
-            slideIndex = _activeSlide - _options.slidesToScroll;
+            slideIndex = _activeSlide - 1;
             _prevPaginationIndex = _paginationIndex;
             _paginationIndex -= 1;
-            _translateValue += _translateValueFormula;
+            if (!checkRightTranslate) {
+                _translateValue += _slideOuterWidth * _options.slidesToScroll;
+                console.log(_translateValue);
+                slideIndex = _activeSlide - _options.slidesToScroll;
+            }
             changeActiveSlide(slideIndex);
             showSlide();
+            console.log(_activeSlide);
+            if (((_slidesCount - 1) - _activeSlide) < _options.slidesToShow * 2) {
+                // console.log('hello');
+                // _translateValue += _slideOuterWidth;
+                checkRightTranslate = true;
+            }
         });
         
         arrowNext = createNewElementAppend('button', _sliderWrapper, ['slider-arrow', 'slider-arrow-next']);
@@ -122,22 +134,33 @@ function Slider() {
             arrowNext.setAttribute("disabled", true);
         }
         arrowNext.addEventListener('click', function () {
-            slideIndex = _activeSlide + _options.slidesToScroll;
+            slideIndex = _activeSlide + 1;
             _prevPaginationIndex = _paginationIndex;
             _paginationIndex += 1;
-            _translateValue -= _translateValueFormula;
+            if (!checkLeftTranslate) {
+                _translateValue -= _slideOuterWidth * _options.slidesToScroll;
+                slideIndex = _activeSlide + _options.slidesToScroll;
+            }
             changeActiveSlide(slideIndex);
             showSlide();
+            if (((_slidesCount - 1) - _activeSlide) < _options.slidesToShow * 2) {
+                _translateValue -= _slideOuterWidth;
+                checkLeftTranslate = true;
+            }
         });
     };
     const updateArrows = function () {
         arrowPrev.disabled = _paginationIndex === 0;
-        arrowNext.disabled = _paginationIndex === Math.floor(_slidesCount / _options.slidesToScroll) - 1;
+        if (_options.slidesToScroll > 1) {
+            arrowNext.disabled = _paginationIndex === Math.floor((_slidesCount - 1) / _options.slidesToScroll);
+        } else {
+            arrowNext.disabled = _paginationIndex === _slidesCount - _options.slidesToShow;
+        }
     }
     const createBulletsPagination = function () {
         let slideIndex = 0;
         _pagination = createNewElementAppend('ul', _sliderWrapper, ['slider-pagination']);
-        let _bulletsCount = Math.floor(_slidesCount / _options.slidesToScroll);
+        let _bulletsCount = Math.floor(_slidesCount / _options.slidesToScroll) - (_options.slidesToShow - _options.slidesToScroll);
         for (let i = 0; i < _bulletsCount; i++) {
             let _paginationBullet = createNewElementAppend('li', _pagination, ['slider-pagination-bullet']);
             let _paginationBulletBtn = createNewElementAppend('button', _paginationBullet, ['slider-pagination-bullet-btn']);
@@ -205,13 +228,6 @@ function Slider() {
                 _updatePagination = updateBulletsPagination;
             }
         }
-        console.log('active slides');
-        console.log(_activeSlide);
-        console.log(_prevActiveSlide);
-        console.log('slides to scroll');
-        console.log(_options.slidesToScroll);
-        console.log('slides to show');
-        console.log(_options.slidesToShow);
     };
 }
 
