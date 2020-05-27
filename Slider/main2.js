@@ -20,13 +20,19 @@ function Slider() {
     let _slider;
     let _sliderWidth = 0;
     let _slides;
+    let _slidesCount = 0;
     let _slideWidth = 0;
+    let _slideOuterWidth = 0;
     let _activeSlide;
+    let _prevActiveSlide = _activeSlide;
     let _pagination;
     let _paginationBullets = [];
     let _paginationCounterCurrent;
-    // let _paginationCounterDivider;
-    // let _paginationCounterTotal;
+    let _updatePagination;
+    let _paginationIndex = 0;
+    let _prevPaginationIndex = _paginationIndex;
+    let arrowPrev;
+    let arrowNext;
     let _options = {
         slidesToShow: 1,
         slidesToScroll: 1,
@@ -59,6 +65,7 @@ function Slider() {
     };
     const setSlideWidth = function () {
         _slideWidth = (_sliderWrapperWidth - (_options.spaceBetweenSlides * (_options.slidesToShow - 1))) / _options.slidesToShow;
+        _slideOuterWidth = _slideWidth + _options.spaceBetweenSlides;
         _slides.forEach((slide) => {
             slide.style.width = _slideWidth + 'px';
         })
@@ -71,92 +78,90 @@ function Slider() {
                 slide.style.marginRight = _options.spaceBetweenSlides + 'px';
             }
             _slider.append(slide);
-        })
+        });
         _slider.style.width = _sliderWidth + 'px';
     };
-    const changeSlideClass = function (direction) {
-        _slides[_activeSlide].classList.remove(_options.activeSlideClassName);
-        if (_options.pagination && _options.paginationType === 'bullets') {
-            _paginationBullets[_activeSlide].classList.remove(_options.activeBulletClassName);
+    const changeActiveSlide = function (slideIndex) {
+        _prevActiveSlide = _activeSlide;
+        _activeSlide = slideIndex;
+        changeSlideClass();
+        if (_options.pagination) {
+            _updatePagination();
         }
-        if (direction === 'next') {
-            _activeSlide += _options.slidesToScroll;
-        } else {
-            _activeSlide -= _options.slidesToScroll;
+        if (!_options.loop) {
+            updateArrows();
         }
+    };
+    const changeSlideClass = function () {
+        _slides[_prevActiveSlide].classList.remove(_options.activeSlideClassName);
         _slides[_activeSlide].classList.add(_options.activeSlideClassName);
-        if (_options.pagination && _options.paginationType === 'bullets') {
-            _paginationBullets[_activeSlide].classList.add(_options.activeBulletClassName);
-        }
     };
     const showSlide = function () {
         _slider.style.transform = 'translateX(' + _translateValue + 'px)';
     };
     const createArrows = function () {
-        _translateValueFormula = (_slideWidth + _options.spaceBetweenSlides) * _options.slidesToScroll;
-        let arrowPrev = createNewElementAppend('button', _sliderWrapper, ['slider-arrow', 'slider-arrow-prev']);
+        let slideIndex = 0;
+        _translateValueFormula = _slideOuterWidth * _options.slidesToScroll;
+        
+        arrowPrev = createNewElementAppend('button', _sliderWrapper, ['slider-arrow', 'slider-arrow-prev']);
         arrowPrev.innerHTML = _options.arrowPrev;
         if ((!_options.loop) && _options.firstSlideIndex === 0) {
-            arrowPrev.setAttribute("disabled", true);
+            arrowPrev.disabled = true;
         }
         arrowPrev.addEventListener('click', function () {
-            if (arrowNext.getAttribute('disabled')) {
-                arrowNext.removeAttribute("disabled");
-            }
+            slideIndex = _activeSlide - _options.slidesToScroll;
+            _prevPaginationIndex = _paginationIndex;
+            _paginationIndex -= 1;
             _translateValue += _translateValueFormula;
-            changeSlideClass('prev');
+            changeActiveSlide(slideIndex);
             showSlide();
-            if (_options.pagination && _options.paginationType === 'counter') {
-                updateCounterPagination();
-            }
-            if ((!_options.loop) && _translateValue >= 0) {
-                this.setAttribute("disabled", true);
-            }
         });
-        let arrowNext = createNewElementAppend('button', _sliderWrapper, ['slider-arrow', 'slider-arrow-next']);
+        
+        arrowNext = createNewElementAppend('button', _sliderWrapper, ['slider-arrow', 'slider-arrow-next']);
         arrowNext.innerHTML = _options.arrowNext;
-        if ((!_options.loop) && _options.firstSlideIndex === _slides.length - 1) {
+        if ((!_options.loop) && _options.firstSlideIndex === _slidesCount - 1) {
             arrowNext.setAttribute("disabled", true);
         }
         arrowNext.addEventListener('click', function () {
-            if (arrowPrev.getAttribute('disabled')) {
-                arrowPrev.removeAttribute("disabled");
-            }
+            slideIndex = _activeSlide + _options.slidesToScroll;
+            _prevPaginationIndex = _paginationIndex;
+            _paginationIndex += 1;
             _translateValue -= _translateValueFormula;
-            changeSlideClass('next');
+            changeActiveSlide(slideIndex);
             showSlide();
-            if (_options.pagination && _options.paginationType === 'counter') {
-                updateCounterPagination();
-            }
-            if ((!_options.loop) && _translateValue <= -(_sliderWidth - _slideWidth)) {
-                this.setAttribute("disabled", true);
-            }
         });
     };
+    const updateArrows = function () {
+        arrowPrev.disabled = _paginationIndex === 0;
+        arrowNext.disabled = _paginationIndex === Math.floor(_slidesCount / _options.slidesToScroll) - 1;
+    }
     const createBulletsPagination = function () {
         _pagination = createNewElementAppend('ul', _sliderWrapper, ['slider-pagination']);
-        for (let i = 0; i < _slides.length; i++) {
+        let _bulletsCount = Math.floor(_slidesCount / _options.slidesToScroll);
+        for (let i = 0; i < _bulletsCount; i++) {
             let _paginationBullet = createNewElementAppend('li', _pagination, ['slider-pagination-bullet']);
             let _paginationBulletBtn = createNewElementAppend('button', _paginationBullet, ['slider-pagination-bullet-btn']);
             _paginationBulletBtn.innerText = i + 1;
             _paginationBulletBtn.addEventListener('click', function () {
-                let _prevActiveSlide = _activeSlide;
-                _paginationBullets[_activeSlide].classList.remove(_options.activeBulletClassName);
-                _slides[_activeSlide].classList.remove(_options.activeSlideClassName);
-                _activeSlide = i;
-                _translateValueFormula = (_slideWidth + _options.spaceBetweenSlides) * Math.abs(_activeSlide - _prevActiveSlide);
+                _prevPaginationIndex = _paginationIndex;
+                changeActiveSlide(i);
+                _translateValueFormula = _slideOuterWidth * (Math.abs(_activeSlide - _prevActiveSlide) * _options.slidesToScroll);
                 if (_prevActiveSlide < _activeSlide) {
+                    _paginationIndex += 1;
                     _translateValue -= _translateValueFormula;
                 } else if (_prevActiveSlide > _activeSlide) {
+                    _paginationIndex -= 1;
                     _translateValue += _translateValueFormula;
                 }
                 showSlide();
-                this.parentElement.classList.add(_options.activeBulletClassName);
-                _slides[_activeSlide].classList.add(_options.activeSlideClassName);
             });
             _paginationBullets.push(_paginationBullet);
         }
         _paginationBullets[_activeSlide].classList.add(_options.activeBulletClassName);
+    };
+    const updateBulletsPagination = function () {
+        _paginationBullets[_prevPaginationIndex].classList.remove(_options.activeBulletClassName);
+        _paginationBullets[_paginationIndex].classList.add(_options.activeBulletClassName);
     };
     const createCounterPagination = function () {
         _pagination = createNewElementAppend('p', _sliderWrapper, ['slider-pagination']);
@@ -165,22 +170,24 @@ function Slider() {
         const _paginationCounterDivider = createNewElementAppend('span', _pagination, ['slider-pagination-divider']);
         _paginationCounterDivider.innerText = ' ' + _options.paginationCounterDivider + ' ';
         const _paginationCounterTotal = createNewElementAppend('span', _pagination, ['slider-pagination-total']);
-        _paginationCounterTotal.innerText = _slides.length;
-    }
+        _paginationCounterTotal.innerText = _slidesCount;
+    };
     const updateCounterPagination = function () {
         _paginationCounterCurrent.innerText = _activeSlide + 1;
     };
+    
     this.init = function (sliderWrapper, options) {
         _sliderWrapper = document.querySelector(sliderWrapper);
         _sliderWrapperWidth = _sliderWrapper.offsetWidth;
         _slides = Array.from(_sliderWrapper.children);
+        _slidesCount = _slides.length;
         setOptions(options);
         _activeSlide = _options.firstSlideIndex;
         _slides[_activeSlide].classList.add(_options.activeSlideClassName);
         setSlideWidth();
         create();
-        if (_options.firstSlideIndex > 0 && _options.firstSlideIndex <= _slides.length - 1) {
-            _translateValue -= (_slideWidth + _options.spaceBetweenSlides) * _options.firstSlideIndex;
+        if (_options.firstSlideIndex > 0 && _options.firstSlideIndex <= _slidesCount - 1) {
+            _translateValue -= _slideOuterWidth * _options.firstSlideIndex;
             showSlide();
         }
         if (_options.arrows) {
@@ -189,9 +196,11 @@ function Slider() {
         if (_options.pagination) {
             if (_options.paginationType === 'counter') {
                 createCounterPagination();
+                _updatePagination = updateCounterPagination;
             }
             if (_options.paginationType === 'bullets') {
                 createBulletsPagination();
+                _updatePagination = updateBulletsPagination;
             }
         }
     };
