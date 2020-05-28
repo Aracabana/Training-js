@@ -133,7 +133,7 @@ function Slider() {
             _prevPaginationIndex = _paginationIndex;
             _paginationIndex += 1;
             const array = Array.from({length: _slidesCount}).map(x => 0);
-            array.splice(-_activeSlide);
+            array.splice(0, _activeSlide);
             console.log(array);
             // const nextSlideCounter = ((_slidesCount - 1) - (_activeSlide  + _options.slidesToScroll)) - (_options.slidesToShow - 1);
             // console.log(nextSlideCounter);
