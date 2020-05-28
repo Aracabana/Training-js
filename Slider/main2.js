@@ -31,6 +31,7 @@ function Slider() {
     let _updatePagination;
     let _paginationIndex = 0;
     let _prevPaginationIndex = 0;
+    let _bulletsCount = 0;
     let arrowPrev;
     let arrowNext;
     let _options = {
@@ -99,7 +100,7 @@ function Slider() {
         _slider.style.transform = 'translateX(' + _translateValue + 'px)';
     };
     const createArrows = function () {
-        let slideIndex = 0;
+        let data = {slideIndex: 0}
         
         arrowPrev = createNewElementAppend('button', _sliderWrapper, ['slider-arrow', 'slider-arrow-prev']);
         arrowPrev.innerHTML = _options.arrowPrev;
@@ -107,19 +108,19 @@ function Slider() {
             arrowPrev.disabled = true;
         }
         arrowPrev.addEventListener('click', function () {
-            slideIndex = _activeSlide - 1;
-            _prevPaginationIndex = _paginationIndex;
-            _paginationIndex -= 1;
-            const array = Array.from({length: _slidesCount}).map(x => 0);
-            array.splice(_activeSlide);
-            // console.log(array);
-            // if (array.length < ) {
-            //     _translateValue += _slideOuterWidth;
+            // _prevPaginationIndex = _paginationIndex;
+            // _paginationIndex -= 1;
+            // const array = Array.from({length: _slidesCount}).map(x => 0);
+            // array.splice(_activeSlide);
+            // if (array.length < _options.slidesToShow) {
+            //     _translateValue += _slideOuterWidth * array.length;
+            //     slideIndex = _activeSlide - array.length;
             // } else {
-                _translateValue += _slideOuterWidth * _options.slidesToScroll;
-                slideIndex = _activeSlide - _options.slidesToScroll;
+            //     _translateValue += _slideOuterWidth * _options.slidesToScroll;
+            //     slideIndex = _activeSlide - _options.slidesToScroll;
             // }
-            changeActiveSlide(slideIndex);
+            calculateTranslate(true, data);
+            changeActiveSlide(data.slideIndex);
             showSlide();
         });
         
@@ -129,25 +130,53 @@ function Slider() {
             arrowNext.setAttribute("disabled", true);
         }
         arrowNext.addEventListener('click', function () {
-            slideIndex = _activeSlide + 1;
-            _prevPaginationIndex = _paginationIndex;
-            _paginationIndex += 1;
-            const array = Array.from({length: _slidesCount}).map(x => 0);
-            array.splice(0, _activeSlide);
-            console.log(array);
-            // const nextSlideCounter = ((_slidesCount - 1) - (_activeSlide  + _options.slidesToScroll)) - (_options.slidesToShow - 1);
-            // console.log(nextSlideCounter);
-            // console.log(nextSlideCounter);
-            // if (nextSlideCounter < _options.slidesToShow) {
-            //     _translateValue -= _slideOuterWidth;
+            // _prevPaginationIndex = _paginationIndex;
+            // _paginationIndex += 1;
+            // const array = Array.from({length: _slidesCount}).map(x => 0);
+            // array.splice(0, _activeSlide + _options.slidesToShow);
+            // console.log(array);
+            // if (array.length < _options.slidesToShow) {
+            //     _translateValue -= _slideOuterWidth * array.length;
+            //     slideIndex = _activeSlide + array.length;
             // } else {
-                _translateValue -= _slideOuterWidth * _options.slidesToScroll;
-                slideIndex = _activeSlide + _options.slidesToScroll;
+            //     _translateValue -= _slideOuterWidth * _options.slidesToScroll;
+            //     slideIndex = _activeSlide + _options.slidesToScroll;
             // }
-            changeActiveSlide(slideIndex);
+            calculateTranslate(false, data);
+            changeActiveSlide(data.slideIndex);
             showSlide();
         });
     };
+    const calculateTranslate = function (arrowIsLeft, data) {
+        const sign = arrowIsLeft ? 1 : -1;
+        _prevPaginationIndex = _paginationIndex;
+        _paginationIndex += (arrowIsLeft) ? -1 : 1;
+        if(_options.slidesToScroll > 1) {
+            const array = Array.from({length: _slidesCount}).map(x => 0);
+            (arrowIsLeft) ? array.splice(_activeSlide) : array.splice(0, _activeSlide + _options.slidesToShow);
+            const slideCount = array.length;
+            if (slideCount < _options.slidesToShow) {
+                _translateValue += (_slideOuterWidth * slideCount) * sign;
+                data.slideIndex = _activeSlide - (slideCount * sign);
+            }
+            else if(slideCount === _options.slidesToShow) {
+                if (_options.slidesToShow < _options.slidesToScroll) {
+                    _translateValue += (_slideOuterWidth * slideCount) * sign;
+                    data.slideIndex = _activeSlide - (slideCount * sign);
+                }
+                else {
+                    _translateValue += _slideOuterWidth * _options.slidesToScroll * sign;
+                    data.slideIndex = _activeSlide - (_options.slidesToScroll * sign);
+                }
+            }
+            else {
+                _translateValue += _slideOuterWidth * _options.slidesToScroll * sign;
+                data.slideIndex = _activeSlide - (_options.slidesToScroll * sign);
+            }
+            return 0;
+        }
+        _translateValue += _slideOuterWidth * _options.slidesToScroll * sign;
+    }
     const updateArrows = function () {
         arrowPrev.disabled = _paginationIndex === 0;
         if (_options.slidesToScroll > 1) {
@@ -159,7 +188,6 @@ function Slider() {
     const createBulletsPagination = function () {
         let slideIndex = 0;
         _pagination = createNewElementAppend('ul', _sliderWrapper, ['slider-pagination']);
-        let _bulletsCount = Math.floor(_slidesCount / _options.slidesToScroll) - (_options.slidesToShow - _options.slidesToScroll);
         for (let i = 0; i < _bulletsCount; i++) {
             let _paginationBullet = createNewElementAppend('li', _pagination, ['slider-pagination-bullet']);
             let _paginationBulletBtn = createNewElementAppend('button', _paginationBullet, ['slider-pagination-bullet-btn']);
@@ -218,6 +246,12 @@ function Slider() {
             createArrows();
         }
         if (_options.pagination) {
+            if(_options.slidesToScroll === 1) {
+                _bulletsCount = Math.floor(_slidesCount / _options.slidesToScroll) - (_options.slidesToShow - _options.slidesToScroll);
+            } else {
+                console.log(_slidesCount)
+                _bulletsCount = Math.round(_slidesCount / _options.slidesToScroll);
+            }
             if (_options.paginationType === 'counter') {
                 createCounterPagination();
                 _updatePagination = updateCounterPagination;
@@ -227,6 +261,7 @@ function Slider() {
                 _updatePagination = updateBulletsPagination;
             }
         }
+
     };
 }
 
